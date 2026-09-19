@@ -25,7 +25,8 @@ npm run build
 ## Tool
 
 `convert(value, from, to)` returns the converted value, or an error when the two
-units belong to different dimensions.
+units belong to different dimensions. Shorthand (`km`, `C`) and common full names
+(`kilometers`, `celsius`) both work; full names are matched case-insensitively.
 
 ```
 100 C  -> F   =>  212

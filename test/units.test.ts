@@ -54,6 +54,22 @@ test("unknown unit throws", () => {
   assert.throws(() => convert(1, "m", "parsec"), UnknownUnitError);
 });
 
+test("aliases: full unit names resolve to their shorthand", () => {
+  assertClose(convert(1, "kilometers", "meters"), 1000);
+  assertClose(convert(1, "mile", "feet"), 5280, 1e-3);
+  assertClose(convert(1, "pounds", "kg"), 0.45359237);
+  assertClose(convert(2, "hours", "seconds"), 7200);
+});
+
+test("aliases: temperature names, case-insensitive", () => {
+  assertClose(convert(100, "Celsius", "fahrenheit"), 212);
+  assertClose(convert(0, "CELSIUS", "kelvin"), 273.15);
+});
+
+test("aliases: unknown alias still throws UnknownUnitError", () => {
+  assert.throws(() => convert(1, "furlong", "m"), UnknownUnitError);
+});
+
 test("listUnits covers every dimension", () => {
   const units = listUnits();
   for (const u of ["m", "kg", "s", "C", "F", "K"]) {

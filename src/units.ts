@@ -60,6 +60,64 @@ const UNITS: Record<string, UnitDefinition> = {
   },
 };
 
+// Common full-word names for units in UNITS, so callers don't have to know the
+// shorthand. Matched case-insensitively; UNITS itself stays case-sensitive
+// since "m" and "min" would otherwise collide.
+const ALIASES: Record<string, string> = {
+  meter: "m",
+  meters: "m",
+  metre: "m",
+  metres: "m",
+  kilometer: "km",
+  kilometers: "km",
+  kilometre: "km",
+  kilometres: "km",
+  centimeter: "cm",
+  centimeters: "cm",
+  centimetre: "cm",
+  centimetres: "cm",
+  millimeter: "mm",
+  millimeters: "mm",
+  millimetre: "mm",
+  millimetres: "mm",
+  mile: "mi",
+  miles: "mi",
+  yard: "yd",
+  yards: "yd",
+  foot: "ft",
+  feet: "ft",
+  inch: "in",
+  inches: "in",
+  kilogram: "kg",
+  kilograms: "kg",
+  gram: "g",
+  grams: "g",
+  milligram: "mg",
+  milligrams: "mg",
+  pound: "lb",
+  pounds: "lb",
+  ounce: "oz",
+  ounces: "oz",
+  second: "s",
+  seconds: "s",
+  millisecond: "ms",
+  milliseconds: "ms",
+  minute: "min",
+  minutes: "min",
+  hour: "h",
+  hours: "h",
+  day: "day",
+  days: "day",
+  kelvin: "K",
+  celsius: "C",
+  centigrade: "C",
+  fahrenheit: "F",
+};
+
+function resolveUnit(name: string): UnitDefinition | undefined {
+  return UNITS[name] ?? UNITS[ALIASES[name.toLowerCase()]];
+}
+
 export class UnknownUnitError extends Error {
   constructor(unit: string) {
     super(`unknown unit: ${unit}`);
@@ -79,10 +137,10 @@ export function listUnits(): string[] {
 }
 
 export function convert(value: number, from: string, to: string): number {
-  const fromUnit = UNITS[from];
+  const fromUnit = resolveUnit(from);
   if (!fromUnit) throw new UnknownUnitError(from);
 
-  const toUnit = UNITS[to];
+  const toUnit = resolveUnit(to);
   if (!toUnit) throw new UnknownUnitError(to);
 
   if (fromUnit.dimension !== toUnit.dimension) {
