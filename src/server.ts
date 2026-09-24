@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import type {
+  CallToolRequest,
+  CallToolResult,
+} from "@modelcontextprotocol/sdk/types.js";
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
@@ -32,7 +36,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [CONVERT_TOOL],
 }));
 
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
+export async function handleCallTool(request: CallToolRequest): Promise<CallToolResult> {
   if (request.params.name !== "convert") {
     throw new Error(`unknown tool: ${request.params.name}`);
   }
@@ -66,14 +70,21 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
     throw err;
   }
-});
+}
+
+server.setRequestHandler(CallToolRequestSchema, handleCallTool);
 
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+// Only run the server when this file is executed directly (node dist/server.js),
+// not when it's imported for its exports (e.g. from tests).
+const isMain = process.argv[1] !== undefined && import.meta.url === `file://${process.argv[1]}`;
+if (isMain) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
